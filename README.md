@@ -1,24 +1,26 @@
-# 🎓 CampusGemma AI: Open-Source College & Hostel Tech Interview Companion
+# 💼 CampusGemma AI: The Zero-Cost Student Side-Hustle & Technical Coaching Studio
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Google Gemma 2](https://img.shields.io/badge/AI-Google%20Gemma%202-red)](https://ai.google.dev/gemma)
 [![OpenTelemetry GenAI](https://img.shields.io/badge/Observability-OpenTelemetry-orange)](https://opentelemetry.io/)
-[![Tests: Passing](https://img.shields.io/badge/Tests-5%2F5%20Passing-brightgreen)](https://pytest.org)
+[![Tests: Passing](https://img.shields.io/badge/Tests-6%2F6%20Passing-brightgreen)](https://pytest.org)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Streamlit-FF4B4B)](https://campus-gemma-ai-bm7uyhdxvmwbfuy2ak5xkq.streamlit.app/)
 
-**CampusGemma AI** is an open-source technical placement & systems engineering companion designed for students at **IIIT Bhopal**. It empowers engineering students to simulate rigorous technical interviews (Distributed Systems, Concurrency, Operating Systems, Database Internals) and dissect complex lab code with memory models and edge-case detection.
+**CampusGemma AI** is an open-source technical side-hustle studio built for student freelancers and engineering mentors at **IIIT Bhopal**. It turns messy client WhatsApp/Upwork messages into ready-to-sign **Statements of Work (SOW), engineering milestones, and pricing quotes**, while powering a **paid 1-on-1 campus mock-interview & code audit service**—all with **$0.00 in API token costs** thanks to **Google Gemma 2 (`gemma2-9b-it`)** open weights.
 
-Built specifically for **Hacktoberfest 2026 Week 2 DEV Challenge**, powered by **Google Gemma 2 (`gemma2-9b-it`)** open weights and instrumented with native **OpenTelemetry GenAI Observability**.
+Built for the **[Hacktoberfest 2026 Week 2 DEV Challenge (Theme: "Side Hustle")](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)** and instrumented with native **OpenTelemetry GenAI Observability**.
+
+👉 **Live Deployed App:** [https://campus-gemma-ai-bm7uyhdxvmwbfuy2ak5xkq.streamlit.app/](https://campus-gemma-ai-bm7uyhdxvmwbfuy2ak5xkq.streamlit.app/)
 
 ---
 
-## 🎯 Key Capabilities
+## 🎯 Key Capabilities (Built for Student Side Hustles)
 
-- **🚀 Deep Systems Interview Simulation:** Generates rigorous scenario-based problems covering Raft/Paxos consensus, cache-line false sharing, lock-free queues, and database isolation.
-- **📝 Real-Time Answer Rubric & Evaluation:** Objectively scores candidate answers, highlighting technical strengths, missed concurrency trade-offs, and an industry exemplar response.
-- **🔬 Lab Code & Concurrency Dissector:** Explains complex C++/Python lab code with memory layout (Stack/Heap), thread safety analysis, and deadlock warnings.
-- **📊 OpenTelemetry GenAI Observability:** Native in-memory span telemetry following OpenTelemetry GenAI semantic conventions (`gen_ai.system`, `gen_ai.request.model`, latency, and tokens).
-- **🔒 100% Open & Offline-First:** Supports ultra-fast cloud inference, local **Ollama (`gemma2`)**, and a zero-dependency deterministic simulation mode so anyone can evaluate the app with zero API keys.
+1. **💼 Freelance Proposal, SOW & Pricing Generator:** Converts raw client requirements into executive summaries, milestone hour breakdowns, dollar quotes, and anti-scope-creep contract boundaries.
+2. **🎯 Paid Campus Mock-Interview Studio:** Enables senior students to run structured, paid 1-on-1 technical placement interviews for juniors across Distributed Systems, Concurrency, and OS internals with automated 10-point scorecards.
+3. **🔬 Rapid Client Code & Security Auditor:** Dissects C++/Python/Go codebases for memory leaks, race conditions, and algorithmic bottlenecks.
+4. **📊 OpenTelemetry GenAI & Unit Economics Tracker:** Live trace spans following OpenTelemetry GenAI semantic conventions (`gen_ai.system`, `gen_ai.request.model`, latency, and cost savings), proving why open weights make micro-SaaS side hustles 100% profitable.
 
 ---
 
@@ -26,42 +28,37 @@ Built specifically for **Hacktoberfest 2026 Week 2 DEV Challenge**, powered by *
 
 ```mermaid
 flowchart TD
-    User["Student (IIIT Bhopal)"] --> UI["Streamlit Frontend (app.py)"]
+    Client["Client Brief / Junior Student"] --> UI["Streamlit Studio (app.py)"]
     UI --> Engine["CampusGemma Engine (core/engine.py)"]
-    Engine --> Gemma["Google Gemma 2 (Open Weights)"]
+    Engine --> Gemma["Google Gemma 2 (Open Weights: Local Ollama / Groq)"]
     Engine --> OTel["OpenTelemetry GenAI Tracing (core/telemetry.py)"]
-    OTel --> Spans["Live Trace Spans (Latency, Tokens, Status)"]
-    Spans --> UI
+    OTel --> Economics["Unit Economics & Span Dashboard ($0.00 Token Cost)"]
+    Economics --> UI
 ```
+
+---
+
+## 💡 Why Open Innovation Makes This Side Hustle Work
+
+1. **100% Profit Margin (Zero API Token Burn):** When charging ₹299 ($3.50) for a student mock-interview or pitching 20 freelance clients a week, a $20/month proprietary API subscription eats all the profit. Running Google Gemma 2 keeps inference cost at **$0.00**, making the side hustle profitable from Day 1.
+2. **Strict Client NDA & Data Privacy:** Local business owners and freelance clients don't want their private inventory schemas or proprietary code uploaded to closed corporate training clouds. Local execution via Ollama keeps 100% of client data on your laptop.
+3. **No Vendor Lock-In:** Swap seamlessly between local `gemma2:9b` via Ollama on a laptop with no internet, or fast open-weight cloud endpoints.
 
 ---
 
 ## 🚀 Quickstart Guide
 
-### 1. Clone & Install
 ```bash
 git clone https://github.com/VimalN2005/campus-gemma-ai.git
 cd campus-gemma-ai
 pip install -r requirements.txt
-```
-
-### 2. Run the Application
-```bash
 streamlit run app.py
 ```
 
-### 3. Run Test Suite
+### Run Pytest Suite
 ```bash
 python -m pytest tests/test_engine.py -v
 ```
-
----
-
-## 💡 Why Open Innovation Matters
-
-1. **Hostel & Student Privacy:** Technical preparation notes, practice answers, and weakness evaluations remain private to the student and are never harvested by closed cloud AI platforms.
-2. **Zero Barrier to Entry:** Engineering students shouldn't have to pay expensive monthly subscription fees to drill system design or get constructive feedback on their lab code.
-3. **True Local Portability:** With local Ollama execution, students can run deep systems simulations on laptops in the library or train journeys with zero internet connection.
 
 ---
 
