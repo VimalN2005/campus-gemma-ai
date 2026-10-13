@@ -1,5 +1,7 @@
 # 💼 CampusGemma AI: The Zero-Cost Student Side-Hustle & Technical Coaching Studio
 
+![CampusGemma AI Banner](assets/cover.jpg)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Google Gemma 2](https://img.shields.io/badge/AI-Google%20Gemma%202-red)](https://ai.google.dev/gemma)

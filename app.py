@@ -86,21 +86,49 @@ with tab1:
     st.subheader("Turn Messy WhatsApp / Upwork Client Briefs into Ready-to-Sign Proposals")
     col1, col2 = st.columns([3, 1])
     with col1:
-        default_brief = (
-            "Hi! I run a local bakery and book cafe in Bhopal. Right now we take custom cake orders over WhatsApp "
-            "and track everything in a messy Excel sheet. Half the time we miss delivery slots or forget advance payments. "
-            "Can you build us a fast order booking backend with invoice PDFs and an admin dashboard?"
+        preset_choice = st.selectbox(
+            "Quick Demo Presets:",
+            [
+                "Custom Client Brief",
+                "Preset: Local Bakery & Cafe Online Ordering Backend",
+                "Preset: Freelance React & Tailwind Portfolio Website",
+                "Preset: Student Club Event Ticketing & QR Portal",
+            ]
         )
-        client_brief = st.text_area("Paste Raw Client Requirement / Message:", value=default_brief, height=130)
+        if preset_choice == "Preset: Local Bakery & Cafe Online Ordering Backend":
+            default_brief = (
+                "Hi! I run a local bakery and book cafe in Bhopal. Right now we take custom cake orders over WhatsApp "
+                "and track everything in a messy Excel sheet. Half the time we miss delivery slots or forget advance payments. "
+                "Can you build us a fast order booking backend with invoice PDFs and an admin dashboard?"
+            )
+        elif preset_choice == "Preset: Freelance React & Tailwind Portfolio Website":
+            default_brief = (
+                "Hey Vimal, I need a high-converting personal portfolio website for my consulting business. "
+                "Need 4 pages: Home, Case Studies, Services, Contact with email integration. "
+                "Must be fully responsive, dark mode, under 1s load time, and deployed on Vercel."
+            )
+        elif preset_choice == "Preset: Student Club Event Ticketing & QR Portal":
+            default_brief = (
+                "Our college coding society is organizing an inter-college hackathon with 500+ participants. "
+                "We need a registration portal that accepts UPI payments, verifies transactions, "
+                "and automatically generates unique QR entry passes sent to students' emails."
+            )
+        else:
+            default_brief = ""
+
+        client_brief = st.text_area("Paste Raw Client Requirement / Message:", value=default_brief, height=130, placeholder="Paste your client's email, Upwork job, or WhatsApp brief here...")
     with col2:
         hourly_rate = st.number_input("Your Hourly Rate ($ USD)", min_value=10.0, max_value=150.0, value=25.0, step=5.0)
         st.caption("Automatically calculates milestone quotes & anti-scope-creep clauses.")
 
     if st.button("⚡ Generate Statement of Work (SOW) & Pricing Quote", use_container_width=True):
-        with st.spinner("Google Gemma 2 structuring SOW, milestones, and recording OpenTelemetry trace..."):
-            st.session_state["proposal"] = engine.generate_freelance_proposal(
-                client_brief=client_brief, hourly_rate_usd=hourly_rate
-            )
+        if not client_brief.strip():
+            st.warning("Please paste a client requirement or pick a preset above.")
+        else:
+            with st.spinner("Google Gemma 2 structuring SOW, milestones, and recording OpenTelemetry trace..."):
+                st.session_state["proposal"] = engine.generate_freelance_proposal(
+                    client_brief=client_brief, hourly_rate_usd=hourly_rate
+                )
 
     if "proposal" in st.session_state:
         prop = st.session_state["proposal"]
@@ -116,6 +144,45 @@ with tab1:
             st.info(f"**🛡️ Anti-Scope-Creep Clause:**\n\n{prop.get('scope_boundaries')}")
         with col_b:
             st.warning(f"**🏗️ Recommended Tech Stack:**\n\n{prop.get('tech_stack_recommendation')}")
+
+        # Exportable SOW Document
+        milestones_formatted = "\n".join([f"- {m}" for m in prop.get("milestones", [])])
+        sow_document = f"""# 📄 STATEMENT OF WORK (SOW) & FREELANCE CONTRACT
+
+**Project:** Custom Engineering & Software Development
+**Prepared By:** Campus Freelance Engineer
+**Target Hourly Rate:** ${hourly_rate}/hr
+**Total Estimated Investment:** {prop.get('total_estimated_cost')}
+
+---
+
+## 1. Executive Summary
+{prop.get('executive_summary')}
+
+## 2. Engineering Milestones & Deliverables
+{milestones_formatted}
+
+## 3. Recommended Architecture
+{prop.get('tech_stack_recommendation')}
+
+## 4. Scope-Creep Protection & Legal Boundaries
+{prop.get('scope_boundaries')}
+
+---
+
+### Acceptance & Authorization
+By signing below, the client agrees to the milestones, payment terms, and scope boundaries outlined above:
+
+**Client Signature:** ___________________________  **Date:** _______________  
+**Developer Signature:** ________________________  **Date:** _______________  
+"""
+        st.download_button(
+            label="📥 Download Formal SOW Agreement (.md)",
+            data=sow_document,
+            file_name="CampusGemma_Freelance_SOW.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
 
 # ----------------- TAB 2: PAID MOCK INTERVIEW COACHING -----------------
 with tab2:
@@ -156,10 +223,45 @@ with tab2:
             else:
                 with st.spinner("Gemma 2 grading response..."):
                     eval_res = engine.evaluate_candidate_answer(question=q.get("problem", ""), candidate_answer=candidate_ans)
-                    st.success(f"**Session Score: {eval_res.get('score', 'N/A')} / 10**")
-                    st.markdown(f"**Strengths:** {eval_res.get('strengths')}")
-                    st.markdown(f"**Actionable Gaps:** {eval_res.get('critique')}")
-                    st.info(f"**Reference Solution:** {eval_res.get('exemplar')}")
+                    st.session_state["eval_res"] = eval_res
+
+        if "eval_res" in st.session_state:
+            eval_res = st.session_state["eval_res"]
+            st.success(f"**Session Score: {eval_res.get('score', 'N/A')} / 10**")
+            st.markdown(f"**Strengths:** {eval_res.get('strengths')}")
+            st.markdown(f"**Actionable Gaps:** {eval_res.get('critique')}")
+            st.info(f"**Reference Solution:** {eval_res.get('exemplar')}")
+
+            scorecard_md = f"""# 🎯 1-ON-1 TECHNICAL MOCK INTERVIEW SCORECARD
+
+**Topic:** {topic}
+**Difficulty Level:** {difficulty}
+**Candidate Final Score:** {eval_res.get('score', 'N/A')} / 10
+
+---
+
+## 1. Problem Scenario
+{q.get('problem', '')}
+
+## 2. Key Strengths Demonstrated
+{eval_res.get('strengths', '')}
+
+## 3. Areas for Improvement & Technical Gaps
+{eval_res.get('critique', '')}
+
+## 4. Benchmark Reference Solution
+{eval_res.get('exemplar', '')}
+
+---
+*Mentorship session conducted via CampusGemma AI with OpenTelemetry tracing.*
+"""
+            st.download_button(
+                label="📥 Download Mentorship Scorecard (.md)",
+                data=scorecard_md,
+                file_name="Interview_Scorecard.md",
+                mime="text/markdown",
+                use_container_width=True
+            )
 
 # ----------------- TAB 3: CLIENT CODE AUDITOR -----------------
 with tab3:
@@ -188,11 +290,44 @@ public:
 
     if st.button("🔬 Generate Technical Audit Report", use_container_width=True):
         with st.spinner("Auditing code with Google Gemma 2..."):
-            res = engine.explain_lab_code(code=code_input, language=lang)
-            st.markdown(f"### 📋 Executive Summary\n{res.get('summary')}")
-            st.markdown(f"### 🧠 Memory & Concurrency Analysis\n{res.get('memory_breakdown')}")
-            st.markdown(f"### ⏱️ Algorithmic Complexity\n{res.get('complexity')}")
-            st.warning(f"### ⚠️ Risk & Deadlock Audit\n{res.get('pitfalls')}")
+            st.session_state["audit_res"] = engine.explain_lab_code(code=code_input, language=lang)
+
+    if "audit_res" in st.session_state:
+        res = st.session_state["audit_res"]
+        st.markdown(f"### 📋 Executive Summary\n{res.get('summary')}")
+        st.markdown(f"### 🧠 Memory & Concurrency Analysis\n{res.get('memory_breakdown')}")
+        st.markdown(f"### ⏱️ Algorithmic Complexity\n{res.get('complexity')}")
+        st.warning(f"### ⚠️ Risk & Deadlock Audit\n{res.get('pitfalls')}")
+
+        audit_md = f"""# 🔬 TECHNICAL CODE AUDIT & SECURITY REPORT
+
+**Language:** {lang.upper()}
+**Audit Engine:** Google Gemma 2 (`gemma2-9b-it`)
+
+---
+
+## 1. Executive Summary
+{res.get('summary', '')}
+
+## 2. Memory & Concurrency Architecture
+{res.get('memory_breakdown', '')}
+
+## 3. Algorithmic Complexity
+{res.get('complexity', '')}
+
+## 4. Identified Vulnerabilities & Pitfalls
+{res.get('pitfalls', '')}
+
+---
+*Generated by CampusGemma AI Client Security Auditor.*
+"""
+        st.download_button(
+            label="📥 Download Audit Report (.md)",
+            data=audit_md,
+            file_name="Code_Audit_Report.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
 
 # ----------------- TAB 4: OPENTELEMETRY & UNIT ECONOMICS -----------------
 with tab4:
