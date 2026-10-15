@@ -74,3 +74,40 @@ def test_opentelemetry_spans_recorded():
     assert last_span["name"] == "gemma2.freelance_proposal"
     assert last_span["attributes"]["gen_ai.system"] == "gemma"
     assert "trace_id" in last_span
+
+
+def test_generate_client_invoice():
+    engine = CampusGemmaEngine()
+    result = engine.generate_client_invoice(
+        client_name="Aman Verma",
+        project_title="FastAPI E-Commerce Backend",
+        milestone_name="Milestone 1: Database & Auth",
+        amount_usd=120.0,
+        payment_id="vimalsahani@upi",
+    )
+    assert isinstance(result, dict)
+    assert "invoice_number" in result
+    assert "client_name" in result
+    assert "line_items" in result
+    assert "total_amount_usd" in result
+    assert "payment_instructions" in result
+    assert "payment_terms" in result
+    assert len(result["line_items"]) > 0
+
+
+def test_invoice_opentelemetry_span():
+    engine = CampusGemmaEngine()
+    initial_count = len(get_recent_spans())
+    engine.generate_client_invoice(
+        client_name="Test Client",
+        project_title="Test Project",
+        milestone_name="Milestone 1",
+        amount_usd=50.0,
+    )
+    spans = get_recent_spans()
+    assert len(spans) > initial_count
+    last_span = spans[-1]
+    assert last_span["name"] == "gemma2.generate_invoice"
+    assert last_span["attributes"]["gen_ai.system"] == "gemma"
+    assert last_span["attributes"]["side_hustle.type"] == "client_invoice"
+

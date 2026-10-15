@@ -61,6 +61,57 @@ class CampusGemmaEngine:
                 content, fallback_type="proposal", topic=str(hourly_rate_usd)
             )
 
+    def generate_client_invoice(
+        self,
+        client_name: str,
+        project_title: str,
+        milestone_name: str,
+        amount_usd: float = 80.0,
+        payment_id: str = "vimalsahani@upi",
+    ) -> Dict[str, Any]:
+        """Generate a formal milestone invoice with line items, tax notes, and payment instructions."""
+        system_prompt = (
+            "You are an expert freelance business and billing advisor. "
+            "Generate an itemized commercial invoice for a completed freelance engineering milestone."
+        )
+        user_prompt = (
+            f"Client Name: {client_name}\n"
+            f"Project Title: {project_title}\n"
+            f"Milestone: {milestone_name}\n"
+            f"Amount: ${amount_usd} USD\n"
+            f"Payment ID / Handle: {payment_id}\n"
+            "Generate a structured JSON response with keys:\n"
+            "- 'invoice_number': Formatted invoice ID (e.g. INV-2026-001)\n"
+            "- 'issue_date': Invoice issue date (e.g. October 15, 2026)\n"
+            "- 'due_date': Due date (Net 7 days)\n"
+            "- 'client_name': Name of client or organization\n"
+            "- 'project_title': Name of project\n"
+            "- 'milestone_name': Milestone being billed\n"
+            "- 'line_items': List of 2-3 itemized deliverables with individual prices summing to amount\n"
+            "- 'total_amount_usd': Formatted total amount string (e.g. '$80.00 USD')\n"
+            "- 'payment_instructions': Payment details, UPI handle, or wire notes\n"
+            "- 'payment_terms': Standard freelance legal terms (e.g. Net 7 days)"
+        )
+
+        with self.tracer.start_as_current_span("gemma2.generate_invoice") as span:
+            span.set_attribute("gen_ai.system", "gemma")
+            span.set_attribute("gen_ai.request.model", DEFAULT_MODEL)
+            span.set_attribute("side_hustle.type", "client_invoice")
+            span.set_attribute("side_hustle.amount_usd", amount_usd)
+
+            start = time.perf_counter()
+            content = self._call_model(system_prompt, user_prompt)
+            duration_ms = (time.perf_counter() - start) * 1000
+
+            span.set_attribute("gen_ai.latency_ms", round(duration_ms, 2))
+            span.set_attribute("gen_ai.estimated_closed_api_cost_usd", 0.045)
+            span.set_attribute("gen_ai.open_weight_cost_usd", 0.0)
+            return self._safe_parse_json(
+                content,
+                fallback_type="invoice",
+                topic=f"{client_name}|{project_title}|{milestone_name}|{amount_usd}|{payment_id}",
+            )
+
     def generate_interview_question(
         self, topic: str, difficulty: str = "Medium"
     ) -> Dict[str, Any]:
@@ -241,6 +292,35 @@ class CampusGemmaEngine:
                 "memory_breakdown": "Allocates lightweight worker stacks on the heap. Mutex protects shared hash maps from race conditions during concurrent writes.",
                 "complexity": "Time Complexity: O(N log K) using min-heaps. Space Complexity: O(N) auxiliary memory.",
                 "pitfalls": "Ensure readers release read-locks prior to invoking nested writes to prevent classic Reader-Writer deadlocks.",
+            }
+        elif fallback_type == "invoice":
+            parts = topic.split("|")
+            c_name = parts[0] if len(parts) > 0 and parts[0] else "Valued Client"
+            p_title = parts[1] if len(parts) > 1 and parts[1] else "Freelance Software Delivery"
+            m_name = parts[2] if len(parts) > 2 and parts[2] else "Milestone 1: Backend Architecture & Auth"
+            amt = float(parts[3]) if len(parts) > 3 and parts[3].replace(".", "", 1).isdigit() else 80.0
+            pay_id = parts[4] if len(parts) > 4 and parts[4] else "vimalsahani@upi"
+
+            item1_amt = round(amt * 0.6, 2)
+            item2_amt = round(amt - item1_amt, 2)
+
+            return {
+                "invoice_number": "INV-2026-101",
+                "issue_date": "October 15, 2026",
+                "due_date": "October 22, 2026 (Net 7)",
+                "client_name": c_name,
+                "project_title": p_title,
+                "milestone_name": m_name,
+                "line_items": [
+                    f"Core Implementation & Architecture Delivery: ${item1_amt} USD",
+                    f"Testing, Security Review & Deployment Support: ${item2_amt} USD",
+                ],
+                "total_amount_usd": f"${amt:.2f} USD",
+                "payment_instructions": f"Direct UPI Transfer to {pay_id} (or International Bank Wire / PayPal)",
+                "payment_terms": (
+                    "Payment is due within 7 days of milestone sign-off. "
+                    "All code and intellectual property rights transfer upon complete settlement."
+                ),
             }
         else:
             return {
